@@ -1,0 +1,1167 @@
+{
+  "name": "Social Media Reporting",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "=analyze-creator",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        160
+      ],
+      "id": "e63f2dab-9153-40cd-83c5-2c8b2944af5e",
+      "name": "Webhook",
+      "webhookId": "68690b2c-a68a-4451-a08e-2062a6e43b54"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=Reçu : {{ $json.message.content }}\n",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        3040,
+        160
+      ],
+      "id": "4f602b10-bd0c-4d88-8d80-93ec5215dd79",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=[\n  {\n    \"role\": \"system\",\n    \"content\": \"You are an AI assistant specialized in identifying public figures online, even when their names are misspelled. Your task is to:\\n\\n1. Correct the spelling of the input name.\\n2. Identify the most probable Twitter username of this person.\\n3. Identify the most probable Instagram username of this person.\\n\\nBe very persistent and use your internal knowledge of global and regional influencers, athletes, YouTubers, and public figures who have a strong online presence (at least 100,000 followers or major online activity).\\n\\nReturn your answer strictly in this JSON format:\\n{\\n  \\\"corrected_name\\\": \\\"Correct full name\\\",\\n  \\\"twitter_username\\\": \\\"probableTwitterUsername\\\",\\n  \\\"instagram_username\\\": \\\"probableInstagramUsername\\\"\\n}\\n\\nIf the username cannot be found exactly, provide your best guess. Do not return null or empty values.\"\n  },\n  {\n    \"role\": \"user\",\n    \"content\": \"{{ $json.body.creator }}\"\n  }\n]\n\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        384,
+        160
+      ],
+      "id": "b30ee662-805d-4a2e-9d25-458813edee35",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "UCk6KoyYrbpOP6Xp",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "channelId": "={{ $json.channelId }}",
+        "part": [
+          "statistics",
+          "contentDetails",
+          "contentOwnerDetails",
+          "snippet",
+          "id"
+        ]
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        -80
+      ],
+      "id": "e5d6fd4c-6862-4a48-af88-c97b3d06b7ea",
+      "name": "YouTube",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "P47keJw9CQPQOfar",
+          "name": "YouTube account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "95f7c642-3e8b-4514-aac8-d795b58d59d0",
+              "name": "Platform Youtube",
+              "value": "YouTube",
+              "type": "string"
+            },
+            {
+              "id": "72a46e99-e911-47a0-96dc-77caaf808e88",
+              "name": "Channel Id Youtube",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "cce1f807-8114-4a91-a74b-4ad9ffc9c449",
+              "name": "Name Youtube",
+              "value": "={{ $json.snippet.title }}",
+              "type": "string"
+            },
+            {
+              "id": "79f208a9-2fe8-48ba-93a4-89a2c3788249",
+              "name": "Custom URL Youtube",
+              "value": "={{ $json.snippet.customUrl }}",
+              "type": "string"
+            },
+            {
+              "id": "93f1d063-f354-4252-a8e5-333814489f9f",
+              "name": "Country Youtube",
+              "value": "={{ $json.snippet.country }}",
+              "type": "string"
+            },
+            {
+              "id": "2b4c648c-aaf0-4588-9ba5-6161a345c3c7",
+              "name": "Published At Youtube",
+              "value": "={{ $json.snippet.publishedAt }}",
+              "type": "string"
+            },
+            {
+              "id": "211e9a5a-54e5-46b8-ad6a-9bf1a811e1df",
+              "name": "Thumbnail",
+              "value": "={{ $json.snippet.thumbnails.high.url }}",
+              "type": "string"
+            },
+            {
+              "id": "0124f9f6-e408-40d9-8f00-86b5f3adb2ee",
+              "name": "Subscribers Youtube",
+              "value": "={{ $json.statistics.subscriberCount }}",
+              "type": "string"
+            },
+            {
+              "id": "04f1bd11-9cf1-44ed-a480-6f19299953fd",
+              "name": "Views Youtube",
+              "value": "={{ $json.statistics.viewCount }}",
+              "type": "string"
+            },
+            {
+              "id": "3f890b1c-a561-4ffe-909c-7bfb6c4852f6",
+              "name": "Videos Youtube",
+              "value": "={{ $json.statistics.videoCount }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1648,
+        -80
+      ],
+      "id": "ab71f417-6fef-416a-8c9b-2a551434ffec",
+      "name": "Youtube Stats"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Accès aux données JSON du profil\nconst profile = $json.data;\n\nreturn [\n  {\n    json: {\n      platformX:\"X\",\n      nameX: profile.name,\n      userNameX: profile.userName,\n      followersX: profile.followers,\n      followingX: profile.following,\n      statusesCountX: profile.statusesCount,\n      mediaCountX: profile.mediaCount,\n      createdAtX: profile.createdAt,\n      isBlueVerifiedX: profile.isBlueVerified,\n      descriptionX: profile.description,\n      profilePictureX: profile.profilePicture,\n      coverPictureX: profile.coverPicture\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        160
+      ],
+      "id": "84b39e81-4866-49b6-9c9a-ca98add835ef",
+      "name": "X Stats"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const user = item.json;\n\n  return {\n    json: {\n      platformI: \"Instagram\",\n      idI: user.id,\n      usernameI: user.username,\n      followersI: user.followersCount,\n      followingI: user.followsCount,\n      isVerifiedI: user.verified,\n      profilePictureI: user.profilePicUrlHD\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        448
+      ],
+      "id": "86225606-f81a-4cae-bb76-79bd8b24a114",
+      "name": "Instagram Stats"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the raw text response from OpenAI\nconst raw = $json.message.content;\n\ntry {\n  // Parse it as JSON\n  const parsed = JSON.parse(raw);\n\n  // Clean usernames (remove @ if present at the beginning)\n  const cleanUsername = (username) => {\n    return typeof username === 'string' ? username.replace(/^@/, '') : username;\n  };\n\n  return [\n    {\n      json: {\n        corrected_name: parsed.corrected_name,\n        twitter_username: cleanUsername(parsed.twitter_username),\n        instagram_username: cleanUsername(parsed.instagram_username)\n      }\n    }\n  ];\n} catch (e) {\n  // In case parsing fails, return empty or error\n  return [\n    {\n      json: {\n        error: \"Failed to parse OpenAI response\",\n        raw_content: raw\n      }\n    }\n  ];\n}\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        752,
+        160
+      ],
+      "id": "0948b427-ee34-49e0-a9aa-ee67174c6a88",
+      "name": "Profile Name"
+    },
+    {
+      "parameters": {
+        "jsCode": "// On récupère les données des items d'entrée (les résultats de la recherche)\nconst items = $json.items || [];\n\n// Vérifie s'il y a des éléments\nif (items.length === 0) {\n  return [];\n}\n\n// Trouver la chaîne avec le plus grand nombre d'abonnés\nconst maxFollowersChannel = items.reduce((maxChannel, currentChannel) => {\n  // Vérifie si l'élément a le champ `statistics.subscriberCount` pour le nombre d'abonnés\n  const currentSubscribers = parseInt(currentChannel.statistics ? currentChannel.statistics.subscriberCount : 0);\n  const maxSubscribers = parseInt(maxChannel.statistics ? maxChannel.statistics.subscriberCount : 0);\n  \n  // Compare et retourne le canal ayant le plus d'abonnés\n  return currentSubscribers > maxSubscribers ? currentChannel : maxChannel;\n});\n\n// Récupère l'ID de la chaîne avec le plus grand nombre d'abonnés\nreturn [{\n  json: {\n    channelId: maxFollowersChannel.id.channelId\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1232,
+        -80
+      ],
+      "id": "e7ccadac-f26b-45cc-98d7-742b34000e84",
+      "name": "Youtube Channel Id"
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/youtube/v3/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "part",
+              "value": "snippet"
+            },
+            {
+              "name": "q",
+              "value": "={{ $json.corrected_name }}"
+            },
+            {
+              "name": "type",
+              "value": "channel"
+            },
+            {
+              "name": "key",
+              "value": "AIzaSyDzD8CBH0eV0MBt3UijwLMexi7F0ZT434Q"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        -80
+      ],
+      "id": "52799778-65d3-4af5-9fd3-225de201eb94",
+      "name": "Youtube Channel Id API"
+    },
+    {
+      "parameters": {
+        "url": "https://api.twitterapi.io/twitter/user/info",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "userName",
+              "value": "={{ $json.twitter_username }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1072,
+        160
+      ],
+      "id": "457c3daa-897c-476c-9b99-9085b9b76e46",
+      "name": "X API",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Ckb3dsigZDvqvI2u",
+          "name": "Twitter"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"usernames\": [\n        \"{{ $json.instagram_username }}\"\n    ]\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1072,
+        448
+      ],
+      "id": "10828837-8d4f-4238-94ba-c8aed7bb6867",
+      "name": "Instagram API",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "EPbhZvxCoiYPczYg",
+          "name": "Apify key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "774b0a2a-5abc-48c6-9970-9bf96d55ef32",
+              "name": "body.creator",
+              "value": "={{ $json.body.creator }}",
+              "type": "string"
+            },
+            {
+              "id": "ab04d815-b380-4251-b28e-b0dae9b61eff",
+              "name": "platforms",
+              "value": "[\"instagram\", \"twitter\", \"youtube\"]",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        160
+      ],
+      "id": "c93649fb-b4e0-4903-be8d-f0ee4d5de36a",
+      "name": "Profile Name Extractor"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1ZV4cLxvRnAUFVLFh6exkCEgxWuRNITcUkhqmabyvMNg",
+          "mode": "list",
+          "cachedResultName": "Dashboard Social Media",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZV4cLxvRnAUFVLFh6exkCEgxWuRNITcUkhqmabyvMNg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 526959056,
+          "mode": "list",
+          "cachedResultName": "Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZV4cLxvRnAUFVLFh6exkCEgxWuRNITcUkhqmabyvMNg/edit#gid=526959056"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "youtube_platform": "={{ $json.platform_youtube }}",
+            "youtube_channel_id": "={{ $json.channel_id_youtube }}",
+            "youtube_name": "={{ $json.name_youtube }}",
+            "youtube_custom_url": "={{ $json.custom_url_youtube }}",
+            "youtube_country": "={{ $json.country_youtube }}",
+            "youtube_published_at": "={{ $json.published_at_youtube }}",
+            "youtube_thumbnail": "={{ $json.thumbnail_youtube }}",
+            "youtube_subscribers": "={{ $json.subscribers_youtube }}",
+            "youtube_views": "={{ $json.views_youtube }}",
+            "youtube_videos": "={{ $json.videos_youtube }}",
+            "x_name": "={{ $json.name_x }}",
+            "x_platform": "={{ $json.platform_x }}",
+            "x_username": "={{ $json.username_x }}",
+            "x_followers": "={{ $json.followers_x }}",
+            "x_following": "={{ $json.following_x }}",
+            "x_statuses_count": "={{ $json.statuses_count_x }}",
+            "x_media_count": "={{ $json.media_count_x }}",
+            "x_created_at": "={{ $json.created_at_x }}",
+            "x_is_blue_verified": "={{ $json.is_blue_verified_x }}",
+            "x_description": "={{ $json.description_x }}",
+            "x_profile_picture": "={{ $json.profile_picture_x }}",
+            "x_cover_picture": "={{ $json.cover_picture_x }}",
+            "instagram_platform": "={{ $json.platform_instagram }}",
+            "instagram_id": "={{ $json.id_instagram }}",
+            "instagram_username": "={{ $json.username_instagram }}",
+            "instagram_followers": "={{ $json.followers_instagram }}",
+            "instagram_following": "={{ $json.following_instagram }}",
+            "instagram_is_verified": "={{ $json.is_verified_instagram }}",
+            "instagram_profile_picture": "={{ $json.profile_picture_instagram }}",
+            "row_number": "2"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "youtube_platform",
+              "displayName": "youtube_platform",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "youtube_channel_id",
+              "displayName": "youtube_channel_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "youtube_name",
+              "displayName": "youtube_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "youtube_custom_url",
+              "displayName": "youtube_custom_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "youtube_country",
+              "displayName": "youtube_country",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "youtube_published_at",
+              "displayName": "youtube_published_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "youtube_thumbnail",
+              "displayName": "youtube_thumbnail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "youtube_subscribers",
+              "displayName": "youtube_subscribers",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "youtube_views",
+              "displayName": "youtube_views",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "youtube_videos",
+              "displayName": "youtube_videos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "x_platform",
+              "displayName": "x_platform",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "x_name",
+              "displayName": "x_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "x_username",
+              "displayName": "x_username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "x_followers",
+              "displayName": "x_followers",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "x_following",
+              "displayName": "x_following",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "x_statuses_count",
+              "displayName": "x_statuses_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "x_media_count",
+              "displayName": "x_media_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "x_created_at",
+              "displayName": "x_created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "x_is_blue_verified",
+              "displayName": "x_is_blue_verified",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "x_description",
+              "displayName": "x_description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "x_profile_picture",
+              "displayName": "x_profile_picture",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "x_cover_picture",
+              "displayName": "x_cover_picture",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "instagram_platform",
+              "displayName": "instagram_platform",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "instagram_id",
+              "displayName": "instagram_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "instagram_username",
+              "displayName": "instagram_username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "instagram_followers",
+              "displayName": "instagram_followers",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "instagram_following",
+              "displayName": "instagram_following",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "instagram_is_verified",
+              "displayName": "instagram_is_verified",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "instagram_profile_picture",
+              "displayName": "instagram_profile_picture",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2384,
+        160
+      ],
+      "id": "3297a107-7fa5-4516-8d33-eaae26cd034a",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "VGbyRHQN2UWtPlto",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        1984,
+        160
+      ],
+      "id": "c0370eec-19ab-483b-89d7-4ae6dbccf644",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      // YouTube\n      platform_youtube: items[0].json[\"Platform Youtube\"],\n      channel_id_youtube: items[0].json[\"Channel Id Youtube\"],\n      name_youtube: items[0].json[\"Name Youtube\"],\n      custom_url_youtube: items[0].json[\"Custom URL Youtube\"],\n      country_youtube: items[0].json[\"Country Youtube\"],\n      published_at_youtube: items[0].json[\"Published At Youtube\"],\n      thumbnail_youtube: items[0].json[\"Thumbnail\"],\n      subscribers_youtube: items[0].json[\"Subscribers Youtube\"],\n      views_youtube: items[0].json[\"Views Youtube\"],\n      videos_youtube: items[0].json[\"Videos Youtube\"],\n\n      // X\n      platform_x: items[1].json.platformX,\n      name_x: items[1].json.nameX,\n      username_x: items[1].json.userNameX,\n      followers_x: items[1].json.followersX,\n      following_x: items[1].json.followingX,\n      statuses_count_x: items[1].json.statusesCountX,\n      media_count_x: items[1].json.mediaCountX,\n      created_at_x: items[1].json.createdAtX,\n      is_blue_verified_x: items[1].json.isBlueVerifiedX,\n      description_x: items[1].json.descriptionX,\n      profile_picture_x: items[1].json.profilePictureX,\n      cover_picture_x: items[1].json.coverPictureX,\n\n      // Instagram\n      platform_instagram: items[2].json.platformI,\n      id_instagram: items[2].json.idI,\n      username_instagram: items[2].json.usernameI,\n      followers_instagram: items[2].json.followersI,\n      following_instagram: items[2].json.followingI,\n      is_verified_instagram: items[2].json.isVerifiedI,\n      profile_picture_instagram: items[2].json.profilePictureI\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2192,
+        160
+      ],
+      "id": "8e07f9a1-932e-45c5-b9e8-b253997c699e",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "sendTo": "youssefbenyahia6@gmail.com",
+        "subject": "=Performance Dashboard - {{ $json.youtube_name }}",
+        "message": "=<p>Hello,</p>  <p>Please find attached the latest <strong>performance dashboard</strong> for:</p>  <ul>   <li><strong>Name:</strong> {{ $json[\"youtube_name\"] || $json[\"x_name\"] || $json.instagram_username }}</li>   <li><strong>Platforms:</strong> YouTube, X (Twitter), Instagram</li> </ul>  <p>This dashboard includes follower counts, engagement, and content statistics collected automatically via our workflow.</p>  <p>Let us know if you'd like to analyze another creator! 😊</p>  <p>Best regards,<br> The Automation Bot</p>",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2832,
+        160
+      ],
+      "id": "ea5bb1bd-dfb5-4ab3-9a07-135278f36291",
+      "name": "Gmail",
+      "webhookId": "e53ea5e9-9247-499f-a1a8-56475cc3eaa3",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "lHLqerzdqMsVJrU5",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3fd4338e-4f0b-4e87-b951-797ffe7873fc",
+              "name": "platformX",
+              "value": "={{ $json.platformX }}",
+              "type": "string"
+            },
+            {
+              "id": "19d59f91-4c0a-4bff-8d5c-f7decab51bf6",
+              "name": "nameX",
+              "value": "={{ $json.nameX }}",
+              "type": "string"
+            },
+            {
+              "id": "da9ddd42-e923-401b-94e8-17ffceba5635",
+              "name": "userNameX",
+              "value": "={{ $json.userNameX }}",
+              "type": "string"
+            },
+            {
+              "id": "2ebc2151-2e90-4348-83e3-421e6e24d4f8",
+              "name": "followersX",
+              "value": "={{ $json.followersX }}",
+              "type": "number"
+            },
+            {
+              "id": "54b298e9-4e42-4595-91ff-0d76a5a16cfe",
+              "name": "followingX",
+              "value": "={{ $json.followingX }}",
+              "type": "number"
+            },
+            {
+              "id": "32d63736-1d9f-4aba-9adf-02b892c8ae68",
+              "name": "statusesCountX",
+              "value": "={{ $json.statusesCountX }}",
+              "type": "number"
+            },
+            {
+              "id": "75fb630e-368e-43fa-812d-28866d932c2b",
+              "name": "mediaCountX",
+              "value": "={{ $json.mediaCountX }}",
+              "type": "number"
+            },
+            {
+              "id": "b8e6923e-4b2a-491c-8316-74319954a5f4",
+              "name": "createdAtX",
+              "value": "={{ $json.createdAtX }}",
+              "type": "string"
+            },
+            {
+              "id": "5dc1d653-0f57-4c2e-a272-f4f9e6e5ef4b",
+              "name": "isBlueVerifiedX",
+              "value": "={{ $json.isBlueVerifiedX }}",
+              "type": "boolean"
+            },
+            {
+              "id": "1e5a2cad-23ad-4e65-aec3-cac2a28a8c49",
+              "name": "descriptionX",
+              "value": "={{ $json.descriptionX }}",
+              "type": "string"
+            },
+            {
+              "id": "a0e8fd27-3fd1-462b-b993-5f07ee6d7ce5",
+              "name": "profilePictureX",
+              "value": "={{ $json.profilePictureX }}",
+              "type": "string"
+            },
+            {
+              "id": "d647b70d-9321-402e-a671-5570303586e1",
+              "name": "coverPictureX",
+              "value": "={{ $json.coverPictureX }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1648,
+        160
+      ],
+      "id": "d819b86d-964f-4598-bcee-f01d8730acc6",
+      "name": "X stats"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ef1f7113-61b0-401a-b118-942d64fd1d1f",
+              "name": "platformI",
+              "value": "={{ $json.platformI }}",
+              "type": "string"
+            },
+            {
+              "id": "35810890-7bf5-4468-9f42-97fbf31f2a33",
+              "name": "idI",
+              "value": "={{ $json.idI }}",
+              "type": "string"
+            },
+            {
+              "id": "2f748172-af2c-4204-bc07-7641d693e9e7",
+              "name": "usernameI",
+              "value": "={{ $json.usernameI }}",
+              "type": "string"
+            },
+            {
+              "id": "02108fec-9fce-4af7-a2c6-c54b576a82f5",
+              "name": "followersI",
+              "value": "={{ $json.followersI }}",
+              "type": "number"
+            },
+            {
+              "id": "47dffde1-b6ae-491d-a8e1-8adc59722abf",
+              "name": "followingI",
+              "value": "={{ $json.followingI }}",
+              "type": "number"
+            },
+            {
+              "id": "c2ca8eaa-c029-4c37-b627-7f23e399e0f9",
+              "name": "isVerifiedI",
+              "value": "={{ $json.isVerifiedI }}",
+              "type": "boolean"
+            },
+            {
+              "id": "9e80ed3d-62a2-4bda-bc77-f2504d49df11",
+              "name": "profilePictureI",
+              "value": "={{ $json.profilePictureI }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1648,
+        448
+      ],
+      "id": "a63dd149-0f8e-4307-82f8-a6fc73e97223",
+      "name": "Instagram Stats1"
+    },
+    {
+      "parameters": {
+        "url": "https://docs.google.com/spreadsheets/d/1ZV4cLxvRnAUFVLFh6exkCEgxWuRNITcUkhqmabyvMNg/export?exportFormat=pdf&format=pdf&gid=0&pageOrientation=landscape&portrait=false",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2608,
+        160
+      ],
+      "id": "75c05968-5adb-4d27-a5ff-68e9a8f1f9f2",
+      "name": "Export PDF",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Ckb3dsigZDvqvI2u",
+          "name": "Twitter"
+        },
+        "oAuth2Api": {
+          "id": "zPIg9ryDmqa9W7j6",
+          "name": "Google credential"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Profile Name Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Profile Name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YouTube": {
+      "main": [
+        [
+          {
+            "node": "Youtube Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Youtube Stats": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "X Stats": {
+      "main": [
+        [
+          {
+            "node": "X stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instagram Stats": {
+      "main": [
+        [
+          {
+            "node": "Instagram Stats1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Profile Name": {
+      "main": [
+        [
+          {
+            "node": "X API",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Youtube Channel Id API",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Instagram API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Youtube Channel Id": {
+      "main": [
+        [
+          {
+            "node": "YouTube",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Youtube Channel Id API": {
+      "main": [
+        [
+          {
+            "node": "Youtube Channel Id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "X API": {
+      "main": [
+        [
+          {
+            "node": "X Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instagram API": {
+      "main": [
+        [
+          {
+            "node": "Instagram Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Profile Name Extractor": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Export PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "X stats": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Instagram Stats1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Export PDF": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b39da792-e253-4203-a9c5-dcb5f6e2ab77",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e2b36855d2fd6c4ecf19b189846ba5124fafb5cc393cfb49ad4c465067c20c3b"
+  },
+  "id": "DWojWtsxgZ9hmQLX",
+  "tags": []
+}
